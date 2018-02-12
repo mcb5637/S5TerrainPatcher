@@ -49,7 +49,7 @@ namespace TerrainPatcher
         {
             Name = xe.Element("Name").Value;
             if (Name == "")
-                Name = null; 
+                Name = null;
             Type = xe.Element("Type").Value;
             Orientation = float.Parse(xe.Element("Orientation").Value);
             PlayerID = int.Parse(xe.Element("PlayerID").Value);
@@ -151,7 +151,16 @@ namespace TerrainPatcher
             foreach (Entity e in Entities)
             {
                 if (e.IsInBetween(pLow, pHigh))
-                    ents.Add(e);
+                {
+                    if (e.Type == "XD_VillageCenter" || e.Type == "XD_StonePit1" || e.Type == "XD_IronPit1" || e.Type == "XD_ClayPit1" || e.Type == "XD_SulfurPit1")
+                    {
+                        ents.Insert(0, e);
+                    }
+                    else
+                    {
+                        ents.Add(e);
+                    }
+                }
             }
             return ents;
         }

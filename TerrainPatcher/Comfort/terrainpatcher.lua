@@ -1,75 +1,64 @@
-function InitTerrainPatching(_regionNames, _luaPath)
-  terrainPatcher = {
-    regionNames = _regionNames,
-    luaPath = _luaPath or "data\\maps\\externalmap\\",
-    SaveGameOrig = Framework.SaveGame,
-    LoadGameOrig = Mission_OnSaveGameLoaded
-  }
-  entityControl = {
-    doubleUsedEntities = {},
-    highestEntityId = 65537
-  }
-  LoadAllRegions()
-  Trigger.RequestTrigger(Events.LOGIC_EVENT_ENTITY_CREATED,"","EntityControl_EntityCreated",1)
-  Logic.DestroyEntity(Logic.CreateEntity(Entities.XD_ScriptEntity, 2, 2, 0, 0))
-  Framework.SaveGame = function(SaveGameName, Description)
-    local transporter = {}
-    setmetatable(transporter, patchRegions)
-    patchRegions = nil
-    collectgarbage()
-    terrainPatcher.SaveGameOrig(SaveGameName, Description)
-    patchRegions = getmetatable(transporter)
-    transporter = nil
-    collectgarbage()
-  end
-  Mission_OnSaveGameLoaded = function()
-    LoadAllRegions()
-    terrainPatcher.LoadGameOrig()
-  end
+
+--- terrainpatcher 2.0
+-- 
+-- Benutzung in 2 Modi:
+-- 
+-- FreePatching: Die Patchdaten werden jederzeit in einem metatable bereitgehalten und beim neuladen eines savegames erneut geladen.
+-- 		terrainPatcher.initFreePatching(_regionNames, _luaPath) Muss aus der FMA aufgerufen werden, mit den Namen aller Regionen.
+-- 		terrainPatcher.patchRegion(_name)						Lädt eine Region.
+-- 
+-- 
+-- GameLoadPatch: Die Patchdateien werden nur geladen, wenn sie auch benötigt werden.
+-- 					Sind sie in einer S5x gepackt, muss diese geladen sein (automatiscg in FMA und Mission_OnSaveGameLoaded)
+-- 		terrainPatcher.gameLoadPatchRegion(_name)				Lädt die Regionsdaten, lädt die Region und löscht die Regionsdaten danach.
+-- 
+-- Benötigt:
+-- 	- S5Hook (EntityIterator)
+terrainPatcher = {luaPath = "data/maps/externalmap/", useLuac = false, namesuffix = ""}
+function terrainPatcher.initFreePatching(_regionNames, _luaPath)
+	terrainPatcher.regionNames = _regionNames
+	if _luaPath then
+		terrainPatcher.luaPath = _luaPath
+	end
+	terrainPatcher.checkMetatable()
+	terrainPatcher.LoadGameOrig = Mission_OnSaveGameLoaded
+	Mission_OnSaveGameLoaded = function()
+		terrainPatcher.loadRegions()
+		terrainPatcher.LoadGameOrig()
+	end
 end
 
-function PatchRegion(_name)
-  patchRegions[_name]()
+function terrainPatcher.loadRegions()
+	terrainPatcher.checkMetatable()
+	for _, rnam in ipairs(terrainPatcher.regionNames) do
+		terrainPatcher.loadRegion(rnam)
+	end
 end
 
-function LoadAllRegions()
-  patchRegions = {}
-  for i = 1, table.getn(terrainPatcher.regionNames) do
-    Script.Load(terrainPatcher.luaPath .. terrainPatcher.regionNames[i])
-  end
+function terrainPatcher.loadRegion(_name)
+	Script.Load(terrainPatcher.luaPath.._name..terrainPatcher.namesuffix..".lua"..(terrainPatcher.useLuac and "c" or ""))
 end
 
-function EntityControl_EntityCreated()
-  local eId = Event.GetEntityID()
-  if eId > 131072 then
-    oldEId = (eId - math.floor(eId/65536)*65536) + 65536
-    entityControl.doubleUsedEntities[oldEId] = eId
-  else
-    entityControl.highestEntityId = eId
-  end
+function terrainPatcher.checkMetatable()
+	if not getmetatable(terrainPatcher) then
+		setmetatable(terrainPatcher, {})
+	end
 end
 
-function RemoveEntitiesInRegion(posBoundaries)
-  for i = 65536, entityControl.highestEntityId do
-    local eId = i
-    if entityControl.doubleUsedEntities[eId] then
-      eId = entityControl.doubleUsedEntities[eId]
-    end
-    if IsInRectangle(eId, posBoundaries) then
-      Logic.DestroyEntity(eId)
-    end
-  end
+function terrainPatcher.gameLoadPatchRegion(_name)
+	terrainPatcher.checkMetatable()
+	terrainPatcher.loadRegion(_name)
+	terrainPatcher.patchRegion(_name)
+	getmetatable(terrainPatcher)[_name] = nil
 end
 
-function IsInRectangle(eId, posBoundaries)
-  local X, Y, Z = Logic.EntityGetPos(eId)
-  if 
-  X < posBoundaries.low.X or 
-  X > posBoundaries.high.X or 
-  Y < posBoundaries.low.Y or 
-  Y > posBoundaries.high.Y then
-    return false
-  end
-  return true
+function terrainPatcher.patchRegion(_name)
+	getmetatable(terrainPatcher)[_name]()
+end
+
+function terrainPatcher.removeEntitiesInRegion(posBoundaries)
+	for id in S5Hook.EntityIterator(Predicate.InRect(posBoundaries.low.X, posBoundaries.low.Y, posBoundaries.high.X, posBoundaries.hight.Y)) do
+		Logic.DestroyEntity(id)
+	end
 end
 
