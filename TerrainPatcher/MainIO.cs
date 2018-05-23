@@ -140,7 +140,7 @@ namespace TerrainPatcher
             float radius = (float)Math.Sqrt(((pr.XHigh - pr.XLow) / 2) * ((pr.XHigh - pr.XLow) / 2) + ((pr.YHigh - pr.YLow) / 2) * ((pr.YHigh - pr.YLow) / 2));
 
             // region definition
-            sb.Append(string.Format(@"getmetatable(terrainPatcher).{12} = function()
+            sb.Append(string.Format(@"getmetatable(terrainPatcher).{12} = function(_off)
 local terrainData = {{
     heightBoundaries = {{
         high = {{ X = {0}, Y = {1} }},
@@ -242,8 +242,14 @@ local terrainData = {{
             //score luaerr fix
             sb.Append(@"
 }
-TB_Score_OnBuildingConstructionCompleteBkp = Score.OnBuildingConstructionComplete
+local TB_Score_OnBuildingConstructionCompleteBkp = Score.OnBuildingConstructionComplete
 Score.OnBuildingConstructionComplete = function() end");
+
+            // calc offset
+            sb.Append(@"
+_off = _off or {X=0,Y=0}
+local posOffX, posOffY, heightOffX, heightOffY = _off.X, _off.Y, math.floor(_off.X/100), math.floor(_off.Y/100)
+");
 
             // remove old entities
             if (entities)
@@ -259,10 +265,10 @@ for x = terrainData.heightBoundaries.low.X, terrainData.heightBoundaries.high.X 
   for y = terrainData.heightBoundaries.low.Y, terrainData.heightBoundaries.high.Y do");
                 if (heights)
                     sb.Append(@"
-    Logic.SetTerrainNodeHeight(x, y, terrainData.heights[y-terrainData.heightBoundaries.low.Y+1][x-terrainData.heightBoundaries.low.X+1])");
+    Logic.SetTerrainNodeHeight(x+heightOffX, y+heightOffY, terrainData.heights[y-terrainData.heightBoundaries.low.Y+1][x-terrainData.heightBoundaries.low.X+1])");
                 if (vertexColors)
                     sb.Append(@"
-    Logic.SetTerrainVertexColor(x, y, 
+    Logic.SetTerrainVertexColor(x+heightOffX, y+heightOffY, 
     terrainData.vertexColors[y-terrainData.heightBoundaries.low.Y+1][x-terrainData.heightBoundaries.low.X+1][1], 
     terrainData.vertexColors[y-terrainData.heightBoundaries.low.Y+1][x-terrainData.heightBoundaries.low.X+1][2], 
     terrainData.vertexColors[y-terrainData.heightBoundaries.low.Y+1][x-terrainData.heightBoundaries.low.X+1][3])");
@@ -280,13 +286,13 @@ for x = terrainData.quadBoundaries.low.X, terrainData.quadBoundaries.high.X do
   for y = terrainData.quadBoundaries.low.Y, terrainData.quadBoundaries.high.Y do");
                 if (textures)
                     sb.Append(@"
-    Logic.SetTerrainNodeType(x*4, y*4, terrainData.textures[y-terrainData.quadBoundaries.low.Y+1][x-terrainData.quadBoundaries.low.X+1]) ");
+    Logic.SetTerrainNodeType(x*4+heightOffX, y*4+heightOffY, terrainData.textures[y-terrainData.quadBoundaries.low.Y+1][x-terrainData.quadBoundaries.low.X+1]) ");
                 if (waterTypes)
                     sb.Append(@"
-    Logic.ExchangeWaterType(x*4, y*4, x*4+1, y*4+1, 0, terrainData.waterTypes[y-terrainData.quadBoundaries.low.Y+1][x-terrainData.quadBoundaries.low.X+1])");
+    Logic.ExchangeWaterType(x*4+heightOffX, y*4+heightOffY, x*4+1+heightOffX, y*4+1+heightOffY, 0, terrainData.waterTypes[y-terrainData.quadBoundaries.low.Y+1][x-terrainData.quadBoundaries.low.X+1])");
                 if (waterLevels)
                     sb.Append(@"
-    Logic.WaterSetAbsoluteHeight(x*4, y*4, x*4+1, y*4+1, terrainData.waterLevels[y-terrainData.quadBoundaries.low.Y+1][x-terrainData.quadBoundaries.low.X+1]*4)");
+    Logic.WaterSetAbsoluteHeight(x*4+heightOffX, y*4+heightOffY, x*4+1+heightOffX, y*4+1+heightOffY, terrainData.waterLevels[y-terrainData.quadBoundaries.low.Y+1][x-terrainData.quadBoundaries.low.X+1]*4)");
                 sb.Append(@"
   end
 end");
@@ -295,14 +301,14 @@ end");
             // blocking update
             sb.Append(@"
 
---Logic.UpdateBlocking(terrainData.heightBoundaries.low.X, terrainData.heightBoundaries.low.Y, terrainData.heightBoundaries.high.X, terrainData.heightBoundaries.high.Y)");
+Logic.UpdateBlocking(terrainData.heightBoundaries.low.X+heightOffX, terrainData.heightBoundaries.low.Y+heightOffY, terrainData.heightBoundaries.high.X+heightOffX, terrainData.heightBoundaries.high.Y+heightOffY)");
 
             // entities
             if (entities)
                 sb.Append(@"
 
 for i = 1, table.getn(terrainData.newEntities) do
-  local eId = Logic.CreateEntity(terrainData.newEntities[i][1], terrainData.newEntities[i][2], terrainData.newEntities[i][3], terrainData.newEntities[i][4], terrainData.newEntities[i][5])
+  local eId = Logic.CreateEntity(terrainData.newEntities[i][1], terrainData.newEntities[i][2]+posOffX, terrainData.newEntities[i][3]+posOffY, terrainData.newEntities[i][4], terrainData.newEntities[i][5])
   Logic.SetEntityScriptingValue(eId, -33, terrainData.newEntities[i][6])
   if terrainData.newEntities[i][7] then
     if terrainData.newEntities[i][8] then

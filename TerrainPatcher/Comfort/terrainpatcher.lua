@@ -9,7 +9,7 @@
 -- 
 -- 
 -- GameLoadPatch: Die Patchdateien werden nur geladen, wenn sie auch benötigt werden.
--- 					Sind sie in einer S5x gepackt, muss diese geladen sein (automatiscg in FMA und Mission_OnSaveGameLoaded)
+-- 					Sind sie in einer S5x gepackt, muss diese geladen sein (automatisch in FMA und Mission_OnSaveGameLoaded)
 -- 		terrainPatcher.gameLoadPatchRegion(_name)				Lädt die Regionsdaten, lädt die Region und löscht die Regionsdaten danach.
 -- 
 -- Benötigt:
@@ -45,15 +45,15 @@ function terrainPatcher.checkMetatable()
 	end
 end
 
-function terrainPatcher.gameLoadPatchRegion(_name)
+function terrainPatcher.gameLoadPatchRegion(_name, _off)
 	terrainPatcher.checkMetatable()
 	terrainPatcher.loadRegion(_name)
-	terrainPatcher.patchRegion(_name)
+	terrainPatcher.patchRegion(_name, _off)
 	getmetatable(terrainPatcher)[_name] = nil
 end
 
-function terrainPatcher.patchRegion(_name)
-	getmetatable(terrainPatcher)[_name]()
+function terrainPatcher.patchRegion(_name, _off)
+	getmetatable(terrainPatcher)[_name](_off)
 end
 
 function terrainPatcher.removeEntitiesInRegion(posBoundaries)
