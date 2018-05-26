@@ -26,6 +26,7 @@ function terrainPatcher.initFreePatching(_regionNames, _luaPath)
 		terrainPatcher.loadRegions()
 		terrainPatcher.LoadGameOrig()
 	end
+	terrainPatcher.loadRegions()
 end
 
 function terrainPatcher.loadRegions()
