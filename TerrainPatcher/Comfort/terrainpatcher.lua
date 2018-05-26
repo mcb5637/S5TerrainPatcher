@@ -58,7 +58,7 @@ function terrainPatcher.patchRegion(_name, _off)
 end
 
 function terrainPatcher.removeEntitiesInRegion(posBoundaries, off)
-	for id in S5Hook.EntityIterator(Predicate.InRect(posBoundaries.low.X + off.X, posBoundaries.low.Y + off.Y, posBoundaries.high.X + off.X, posBoundaries.hight.Y + off.Y)) do
+	for id in S5Hook.EntityIterator(Predicate.InRect(posBoundaries.low.X + off.X, posBoundaries.low.Y + off.Y, posBoundaries.high.X + off.X, posBoundaries.high.Y + off.Y)) do
 		Logic.DestroyEntity(id)
 	end
 end
