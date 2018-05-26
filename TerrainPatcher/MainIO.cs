@@ -254,7 +254,7 @@ local posOffX, posOffY, heightOffX, heightOffY = _off.X, _off.Y, math.floor(_off
             // remove old entities
             if (entities)
                 sb.Append(@"
-terrainPatcher.removeEntitiesInRegion(terrainData.posBoundaries)");
+terrainPatcher.removeEntitiesInRegion(terrainData.posBoundaries, _off)");
 
             // terrain height & vertex color
             if (heights || vertexColors)
