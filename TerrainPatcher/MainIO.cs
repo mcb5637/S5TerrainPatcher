@@ -140,7 +140,7 @@ namespace TerrainPatcher
             float radius = (float)Math.Sqrt(((pr.XHigh - pr.XLow) / 2) * ((pr.XHigh - pr.XLow) / 2) + ((pr.YHigh - pr.YLow) / 2) * ((pr.YHigh - pr.YLow) / 2));
 
             // region definition
-            sb.Append(string.Format(@"getmetatable(terrainPatcher).{12} = function(_off)
+            sb.Append(string.Format(@"getmetatable(terrainPatcher).{12} = function(_off, _subPatchPos)
 local terrainData = {{
     heightBoundaries = {{
         high = {{ X = {0}, Y = {1} }},
@@ -248,7 +248,12 @@ Score.OnBuildingConstructionComplete = function() end");
             // calc offset
             sb.Append(@"
 _off = _off or {X=0,Y=0}
+_off.X = math.floor(_off.X/100)*100 -- align the offset with texture grid
+_off.Y = math.floor(_off.Y/100)*100
 local posOffX, posOffY, heightOffX, heightOffY = _off.X, _off.Y, math.floor(_off.X/100), math.floor(_off.Y/100)
+if _subPatchPos then
+    posOffX, posOffY, heightOffX, heightOffY = posOffX-posBoundaries.low.X, posOffY-posBoundaries.low.Y, heightOffX-math.floor(posBoundaries.low.X/100), heightOffY-math.floor(posBoundaries.low.Y/100)
+end
 ");
 
             // remove old entities

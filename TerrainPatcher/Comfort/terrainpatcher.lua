@@ -46,15 +46,15 @@ function terrainPatcher.checkMetatable()
 	end
 end
 
-function terrainPatcher.gameLoadPatchRegion(_name, _off)
+function terrainPatcher.gameLoadPatchRegion(_name, _off, _subPatchPos)
 	terrainPatcher.checkMetatable()
 	terrainPatcher.loadRegion(_name)
-	terrainPatcher.patchRegion(_name, _off)
+	terrainPatcher.patchRegion(_name, _off, _subPatchPos)
 	getmetatable(terrainPatcher)[_name] = nil
 end
 
-function terrainPatcher.patchRegion(_name, _off)
-	getmetatable(terrainPatcher)[_name](_off)
+function terrainPatcher.patchRegion(_name, _off, _subPatchPos)
+	getmetatable(terrainPatcher)[_name](_off, _subPatchPos)
 end
 
 function terrainPatcher.removeEntitiesInRegion(posBoundaries, off)
