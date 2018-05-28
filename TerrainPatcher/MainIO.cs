@@ -252,7 +252,7 @@ _off.X = math.floor(_off.X/100)*100 -- align the offset with texture grid
 _off.Y = math.floor(_off.Y/100)*100
 local posOffX, posOffY, heightOffX, heightOffY = _off.X, _off.Y, math.floor(_off.X/100), math.floor(_off.Y/100)
 if _subPatchPos then
-    posOffX, posOffY, heightOffX, heightOffY = posOffX-posBoundaries.low.X, posOffY-posBoundaries.low.Y, heightOffX-math.floor(posBoundaries.low.X/100), heightOffY-math.floor(posBoundaries.low.Y/100)
+    posOffX, posOffY, heightOffX, heightOffY = posOffX-terrainData.posBoundaries.low.X, posOffY-terrainData.posBoundaries.low.Y, heightOffX-math.floor(terrainData.posBoundaries.low.X/100), heightOffY-math.floor(terrainData.posBoundaries.low.Y/100)
 end
 ");
 
