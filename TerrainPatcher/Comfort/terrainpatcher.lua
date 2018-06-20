@@ -4,7 +4,7 @@
 -- Benutzung in 2 Modi:
 -- 
 -- FreePatching: Die Patchdaten werden jederzeit in einem metatable bereitgehalten und beim neuladen eines savegames erneut geladen.
--- 		terrainPatcher.initFreePatching(_regionNames, _luaPath) Muss aus der FMA aufgerufen werden, mit den Namen aller Regionen.
+-- 		terrainPatcher.initFreePatching(_regionNames, _luaPath) Muss aus der FMA aufgerufen werden, mit den Namen aller Regionen im numerischen table _regionNames.
 -- 		terrainPatcher.patchRegion(_name)						Lädt eine Region.
 -- 
 -- 
@@ -12,6 +12,12 @@
 -- 					Sind sie in einer S5x gepackt, muss diese geladen sein (automatisch in FMA und Mission_OnSaveGameLoaded)
 -- 		terrainPatcher.gameLoadPatchRegion(_name)				Lädt die Regionsdaten, lädt die Region und löscht die Regionsdaten danach.
 -- 
+-- Variable, die in beiden Varianten genutzt werden (Optional)
+--		terrainPatcher.luaPath									Pfad von dem die Regionen geladen werden (Standard: "data/maps/externalmap/"),
+--																	nützlich um für Tests nicht immer alles in die s5x packen zu müssen.
+--		terrainPatcher.namesuffix								Teilstring der an den Pfad nach dem Regionenname angehängt wird (Standard: "").
+--		terrainPatcher.useLuac									Ob die Dateiendung .luac anstelle von .lua für Regionenpfade verwendet wird.
+--
 -- Benötigt:
 -- 	- S5Hook (EntityIterator)
 terrainPatcher = {luaPath = "data/maps/externalmap/", useLuac = false, namesuffix = ""}
