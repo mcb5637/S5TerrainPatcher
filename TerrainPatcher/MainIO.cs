@@ -16,7 +16,7 @@ namespace TerrainPatcher
     {
         private string tmpPath;
         private bool console;
-        private TerrainData tdata;
+        internal TerrainData tdata;
         private EntityList elist;
 
         public MainIO(bool console)

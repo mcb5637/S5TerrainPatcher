@@ -27,6 +27,7 @@ namespace TerrainPatcher
         public UInt16[,] Heights;
         public Quad[,] Quads;
         public VertexCol[,] VertexCols;
+        public UInt32 MapSize;
 
         public TerrainData(string terrainDatafilename, string vertexColorsfilename)
         {
@@ -52,7 +53,7 @@ namespace TerrainPatcher
             //sb.Append(string.Format("terrain = \n{{\n\thCnt = {0},\n\theights = {{\n", (int)mX - 2));
 
             Heights = new UInt16[mY - 2, mX - 2];
-
+            MapSize = mX - 2;
             bin.ReadBytes(2 * (int)mX);
             for (int y = 0; y < mY - 2; y++)
             {

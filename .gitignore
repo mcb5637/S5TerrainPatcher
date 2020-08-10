@@ -1,0 +1,9 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/TerrainPatcher/bin/Debug
+/TerrainPatcher/obj/Debug
+/TerrainPatcher/bin/Release
+/TerrainPatcher/obj/Release
